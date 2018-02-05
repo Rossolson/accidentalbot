@@ -114,6 +114,32 @@ function handleNewLink(from, message) {
     }
 }
 
+function handleSlackBridge(from, to, message) {
+
+    // There are lots of configuration settings that can be broken out, once this works.
+    // This should send nearly all IRC traffic to atpfm.slack.com. This will be rate-
+    // limited at a later point in time.
+
+    var textContent = 'A message was found:' + message;
+    var request = require('request');
+    var options = {
+        url: 'https://hooks.slack.com/services/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',
+        method: 'POST',
+        body: {
+            channel: '#irc-bridge',
+            username: 'webhookbot',
+            text: textContent,
+            icon_emoji: ':atp:'
+	}
+    };
+    function callback(error, response, body) {
+        if (!error && response.statusCode == 200) {
+            console.log(body);
+        }
+    }
+    request(options, callback);
+}
+
 function handleHelp(from) {
     client.say(from, 'Options:');
     client.say(from, '!s {title} - suggest a title (in ' + channel + ' only).');
@@ -159,6 +185,8 @@ client.addListener('message', function (from, to, message) {
         handleNewLink(from, message);
     } else if (message.startsWith('!help')) {
         handleHelp(from);
+    } else {
+        handleSlackBridge(from, to, message);
     }
 });
 
